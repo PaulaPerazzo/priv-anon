@@ -11,7 +11,7 @@ from src.training.branch import create_branch
 import pandas as pd
 
 # Load data
-df = pd.read_csv("fft_data.csv")
+df = pd.read_csv("./data/fft_data.csv")
 
 # Adjust data
 X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z = matrix_fourier_adjust(df)
@@ -35,15 +35,12 @@ x = Dense(128, activation='relu')(merged)
 x = Dense(64, activation='relu')(x)
 output = Dense(num_classes, activation='softmax')(x)
 
-print(x)
-print(x.shape)
-print(output)
-print(output.shape)
-
 # final model
 model = Model(inputs=[input_acc_x, input_acc_y, input_acc_z, input_gyro_x, input_gyro_y, input_gyro_z], outputs=output)
 
-# # Compilando o modelo
+# optimize hyperparameters
+
+# compile model
 # model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
 # # Treinamento do modelo
