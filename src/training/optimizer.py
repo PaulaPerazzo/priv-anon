@@ -2,7 +2,9 @@ import pickle
 import sys
 import os
 import time
-sys.path.append('/Users/paulaperazzo/Documents/pibic/datastream-anonymization')
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Flatten, Dense, Concatenate, Conv1D, MaxPooling1D
 from tensorflow.keras.optimizers import Adam
