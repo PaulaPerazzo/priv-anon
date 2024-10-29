@@ -64,8 +64,12 @@ class MetricsLogger(tf.keras.callbacks.Callback):
         self.epoch_metrics["epoch_time"].append(epoch_time)
 
     def on_train_end(self, logs=None):
-        # Save to a JSON file after training
-        with open("training_metrics.json", "a") as f:
-            json.dump(self.epoch_metrics, f)
+        epoch_metrics_serializable = {
+            key: [float(value) if isinstance(value, (np.float32, np.float64)) else value for value in values]
+            for key, values in self.epoch_metrics.items()
+        }
+
+        with open("training_metrics.json", "w") as f:
+            json.dump(epoch_metrics_serializable, f)
 
         print("Training metrics saved to training_metrics.json")
