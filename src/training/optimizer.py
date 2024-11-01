@@ -18,11 +18,14 @@ from src.training.mailer import send_email
 from tensorflow.keras.utils import to_categorical
 
 def get_data():
-    df = pd.read_csv("processed_train_data_gender.csv")
-    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels = matrix_fourier_adjust(df)
-    gender_labels = to_categorical(gender_labels, num_classes=2)
+    df = pd.read_csv("processed_train_data_age.csv")
+    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = matrix_fourier_adjust(df)
 
-    return X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels
+    class_labels -= 1
+    
+    class_labels = to_categorical(class_labels, num_classes=3)
+
+    return X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels
 
 def create_model(trial):
     num_filters1 = trial.suggest_int("num_filters1", 16, 64, step=16)
@@ -33,7 +36,8 @@ def create_model(trial):
     
     input_shape = (256, 1)
     # num_classes = 6 # for activity classification
-    num_classes = 2 # for gender classification
+    # num_classes = 2 # for gender classification
+    num_classes = 3 # for age classification
     
     def create_branch_with_params(input_shape, num_filters1, num_filters2):
         input_layer = Input(shape=input_shape)
@@ -64,11 +68,11 @@ def create_model(trial):
     return model
 
 def objective(trial):
-    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels = get_data()
+    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = get_data()
     
     X_train_acc_x, X_val_acc_x, X_train_acc_y, X_val_acc_y, X_train_acc_z, X_val_acc_z, \
     X_train_gyro_x, X_val_gyro_x, X_train_gyro_y, X_val_gyro_y, X_train_gyro_z, X_val_gyro_z, \
-    y_train, y_val = train_test_split(X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels, test_size=0.2)
+    y_train, y_val = train_test_split(X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels, test_size=0.2)
 
     model = create_model(trial)
     
@@ -78,7 +82,7 @@ def objective(trial):
         [X_train_acc_x, X_train_acc_y, X_train_acc_z, X_train_gyro_x, X_train_gyro_y, X_train_gyro_z],
         y_train,
         validation_data=([X_val_acc_x, X_val_acc_y, X_val_acc_z, X_val_gyro_x, X_val_gyro_y, X_val_gyro_z], y_val),
-        epochs=20,
+        epochs=50,
         batch_size=trial.suggest_categorical("batch_size", [32, 64, 128]),
         callbacks=[early_stopping],
         verbose=0
@@ -92,7 +96,7 @@ def objective(trial):
 
     return val_accuracy
 
-def save_best_hyperparameters(study, filename="best_hyperparameters_gender.json"):
+def save_best_hyperparameters(study, filename="best_hyperparameters_age.json"):
     best_params = study.best_params
 
     with open(filename, "w") as f:
@@ -100,13 +104,13 @@ def save_best_hyperparameters(study, filename="best_hyperparameters_gender.json"
 
     print(f"Best hyperparameters saved to {filename}")
 
-def save_losses(loss, val_loss, filename="losses_gender.json"):
+def save_losses(loss, val_loss, filename="losses_age.json"):
     losses = {
         "loss": loss, 
         "val_loss": val_loss
     }
 
-    with open(filename, "a") as f:
+    with open(filename, "w") as f:
         json.dump(losses, f)
     
     print(f"Losses saved to {filename}")
@@ -124,13 +128,13 @@ end_time = time.time()
 total_time = end_time - start_time
 print(f"Total time: {total_time:.2f} seconds")
 
-with open("study_gender.pkl", "wb") as f:
+with open("study_age.pkl", "wb") as f:
     pickle.dump(study, f)
 
-with open("log_time_gender.txt", "w") as f:
+with open("log_time_age.txt", "w") as f:
     f.write(f"Total time: {total_time:.2f} seconds")
 
 save_best_hyperparameters(study)
 print("Best hyperparameters:", study.best_params)
 
-send_email("hyperparameter gender optimization")
+send_email("hyperparameter age optimization")
