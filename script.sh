@@ -15,4 +15,4 @@ module load Python/3.9
 source ./env/bin/activate
 
 # executar .py
-python3 src/training/optimizer.py
+python3 src/training/main.py

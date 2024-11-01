@@ -43,12 +43,16 @@ class MetricsLogger(tf.keras.callbacks.Callback):
         epoch_time = time.time() - self.epoch_start_time
         y_pred = np.argmax(self.model.predict(self.X_train), axis=1)
         y_true = np.argmax(self.y_train, axis=1)
+
+        y_pred_proba = self.model.predict(self.X_train)[:, 1]
+        y_true_binary = np.argmax(self.y_train, axis=1)
         
         # Calculate additional metrics
         precision = precision_score(y_true, y_pred, average="weighted")
         recall = recall_score(y_true, y_pred, average="weighted")
         f1 = f1_score(y_true, y_pred, average="weighted")
-        auc = roc_auc_score(y_true, self.model.predict(self.X_train), average="weighted", multi_class="ovr")
+        # auc = roc_auc_score(y_true, self.model.predict(self.X_train), average="weighted", multi_class="ovr")
+        auc = roc_auc_score(y_true_binary, y_pred_proba)
         learning_rate = self.model.optimizer.learning_rate.numpy()
 
         # Store metrics
@@ -69,7 +73,7 @@ class MetricsLogger(tf.keras.callbacks.Callback):
             for key, values in self.epoch_metrics.items()
         }
 
-        with open("training_metrics.json", "w") as f:
+        with open("training_metrics_gender.json", "w") as f:
             json.dump(epoch_metrics_serializable, f)
 
-        print("Training metrics saved to training_metrics.json")
+        print("Training metrics saved to training_metrics_gender.json")
