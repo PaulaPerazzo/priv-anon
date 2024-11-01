@@ -18,11 +18,11 @@ from src.training.mailer import send_email
 from tensorflow.keras.utils import to_categorical
 
 def get_data():
-    df = pd.read_csv("processed_data_new.csv")
-    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = matrix_fourier_adjust(df)
-    class_labels = to_categorical(class_labels, num_classes=6)
+    df = pd.read_csv("processed_train_data_gender.csv")
+    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels = matrix_fourier_adjust(df)
+    gender_labels = to_categorical(gender_labels, num_classes=2)
 
-    return X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels
+    return X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels
 
 def create_model(trial):
     num_filters1 = trial.suggest_int("num_filters1", 16, 64, step=16)
@@ -32,7 +32,8 @@ def create_model(trial):
     learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-2)
     
     input_shape = (256, 1)
-    num_classes = 6
+    # num_classes = 6 # for activity classification
+    num_classes = 2 # for gender classification
     
     def create_branch_with_params(input_shape, num_filters1, num_filters2):
         input_layer = Input(shape=input_shape)
@@ -63,15 +64,15 @@ def create_model(trial):
     return model
 
 def objective(trial):
-    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = get_data()
+    X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels = get_data()
     
     X_train_acc_x, X_val_acc_x, X_train_acc_y, X_val_acc_y, X_train_acc_z, X_val_acc_z, \
     X_train_gyro_x, X_val_gyro_x, X_train_gyro_y, X_val_gyro_y, X_train_gyro_z, X_val_gyro_z, \
-    y_train, y_val = train_test_split(X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels, test_size=0.2)
+    y_train, y_val = train_test_split(X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, gender_labels, test_size=0.2)
 
     model = create_model(trial)
     
-    early_stopping = EarlyStopping(monitor='val_loss', patience=3)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
 
     history = model.fit(
         [X_train_acc_x, X_train_acc_y, X_train_acc_z, X_train_gyro_x, X_train_gyro_y, X_train_gyro_z],
@@ -91,7 +92,7 @@ def objective(trial):
 
     return val_accuracy
 
-def save_best_hyperparameters(study, filename="best_hyperparameters.json"):
+def save_best_hyperparameters(study, filename="best_hyperparameters_gender.json"):
     best_params = study.best_params
 
     with open(filename, "w") as f:
@@ -99,13 +100,13 @@ def save_best_hyperparameters(study, filename="best_hyperparameters.json"):
 
     print(f"Best hyperparameters saved to {filename}")
 
-def save_losses(loss, val_loss, filename="losses.json"):
+def save_losses(loss, val_loss, filename="losses_gender.json"):
     losses = {
         "loss": loss, 
         "val_loss": val_loss
     }
 
-    with open(filename, "w") as f:
+    with open(filename, "a") as f:
         json.dump(losses, f)
     
     print(f"Losses saved to {filename}")
@@ -123,13 +124,13 @@ end_time = time.time()
 total_time = end_time - start_time
 print(f"Total time: {total_time:.2f} seconds")
 
-with open("study.pkl", "wb") as f:
+with open("study_gender.pkl", "wb") as f:
     pickle.dump(study, f)
 
-with open("log_time.txt", "w") as f:
+with open("log_time_gender.txt", "w") as f:
     f.write(f"Total time: {total_time:.2f} seconds")
 
 save_best_hyperparameters(study)
 print("Best hyperparameters:", study.best_params)
 
-send_email("hyperparameter optimization")
+send_email("hyperparameter gender optimization")

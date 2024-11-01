@@ -8,8 +8,8 @@ def send_email(subject):
     msg = MIMEMultipart()
 
     email = "mpps@cin.ufpe.br"
-    password = ""
-    message = f"your model for {subject} is ready"
+    password = "ptfe ptnq xupt vqbg"
+    message = f"your code for {subject} is ready"
 
     msg['From'] = email
     msg['To'] = email
