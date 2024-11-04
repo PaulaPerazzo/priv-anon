@@ -17,14 +17,15 @@ from tensorflow.keras.callbacks import EarlyStopping
 from src.training.mailer import send_email
 
 # Load data
-df = pd.read_csv("processed_train_data_gender.csv")
+df = pd.read_csv("processed_train_data_age.csv")
 
 # Adjust data
 X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = matrix_fourier_adjust(df)
+class_labels -= 1 # adjust labels
 
 # parameters
 input_shape = (256, 1) # shape of the input data
-num_classes = 2 # number of classes
+num_classes = 3 # number of classes
 
 input_acc_x, branch_acc_x = create_branch(input_shape)
 input_acc_y, branch_acc_y = create_branch(input_shape)
@@ -36,7 +37,7 @@ input_gyro_z, branch_gyro_z = create_branch(input_shape)
 # concatenate branches
 merged = Concatenate()([branch_acc_x, branch_acc_y, branch_acc_z, branch_gyro_x, branch_gyro_y, branch_gyro_z])
 
-best_hyperparameters = "./src/training/best_hyperparameters_gender.json"
+best_hyperparameters = "./src/training/hyperparams/best_hyperparameters_age.json"
 with open(best_hyperparameters, 'r') as f:
     best_hyperparameters = json.load(f)
 
@@ -50,7 +51,7 @@ model = Model(inputs=[input_acc_x, input_acc_y, input_acc_z, input_gyro_x, input
 model.compile(optimizer=Adam(learning_rate=best_hyperparameters['learning_rate']), loss='categorical_crossentropy', metrics=['accuracy'])
 print("Model created")
 
-y = tf.keras.utils.to_categorical(class_labels, num_classes=2)
+y = tf.keras.utils.to_categorical(class_labels, num_classes=3)
 
 # Split data train / val
 X_train_acc_x, X_val_acc_x, X_train_acc_y, X_val_acc_y, X_train_acc_z, X_val_acc_z, \
@@ -79,7 +80,7 @@ final_time = time.time()
 # time spent for training
 time_spent = final_time - initial_time
 
-with open("log_time_training_gender.txt", "w") as f:
+with open("log_time_training_age.txt", "w") as f:
     f.write(str(time_spent))
 
 print("Training finished")
@@ -87,7 +88,7 @@ print("Time spent for training: ")
 print(final_time)
 
 # Save model
-model.save("gender_classifier.h5")
+model.save("age_classifier.h5")
 
 # Send email
-send_email("training gender classifier model")
+send_email("training age classifier model")
