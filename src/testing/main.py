@@ -9,19 +9,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from src.data_preprocessing.fourier import matrix_fourier_adjust, fourier_transform
 
 def main():
-    sensor_data = pd.read_csv("./data/motion_sense_test.csv", usecols=["rotationRate.x", "rotationRate.y", "rotationRate.z", "userAcceleration.x", "userAcceleration.y", "userAcceleration.z", "gender"])
+    sensor_data = pd.read_csv("./data/motion_sense_test.csv", usecols=["rotationRate.x", "rotationRate.y", "rotationRate.z", "userAcceleration.x", "userAcceleration.y", "userAcceleration.z", "age"])
 
     buffer_size = 256
     step_size = 128
     fft_data = []
 
-    model_path = "gender_classifier.h5"
+    model_path = "./src/models/age_classifier.h5"
     model = load_model(model_path)
 
     for start in range(0, len(sensor_data) - buffer_size + 1, step_size):
         buffer_df = sensor_data.iloc[start:start + buffer_size]
 
         freq, fft_ax, fft_ay, fft_az, fft_gx, fft_gy, fft_gz, class_labels = fourier_transform(buffer_df)
+        class_labels -= 1
 
         fft_features = {
             'freq': freq,

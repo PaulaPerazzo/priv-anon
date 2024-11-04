@@ -18,7 +18,7 @@ from src.training.mailer import send_email
 from tensorflow.keras.utils import to_categorical
 
 def get_data():
-    df = pd.read_csv("processed_train_data_age.csv")
+    df = pd.read_csv("processed_train_data_height.csv")
     X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = matrix_fourier_adjust(df)
 
     class_labels -= 1
@@ -37,7 +37,7 @@ def create_model(trial):
     input_shape = (256, 1)
     # num_classes = 6 # for activity classification
     # num_classes = 2 # for gender classification
-    num_classes = 3 # for age classification
+    num_classes = 3 # for age, height classification
     
     def create_branch_with_params(input_shape, num_filters1, num_filters2):
         input_layer = Input(shape=input_shape)
@@ -76,7 +76,7 @@ def objective(trial):
 
     model = create_model(trial)
     
-    early_stopping = EarlyStopping(monitor='val_loss', patience=5)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 
     history = model.fit(
         [X_train_acc_x, X_train_acc_y, X_train_acc_z, X_train_gyro_x, X_train_gyro_y, X_train_gyro_z],
@@ -96,7 +96,7 @@ def objective(trial):
 
     return val_accuracy
 
-def save_best_hyperparameters(study, filename="best_hyperparameters_age.json"):
+def save_best_hyperparameters(study, filename="best_hyperparameters_height.json"):
     best_params = study.best_params
 
     with open(filename, "w") as f:
@@ -104,7 +104,7 @@ def save_best_hyperparameters(study, filename="best_hyperparameters_age.json"):
 
     print(f"Best hyperparameters saved to {filename}")
 
-def save_losses(loss, val_loss, filename="losses_age.json"):
+def save_losses(loss, val_loss, filename="losses_height.json"):
     losses = {
         "loss": loss, 
         "val_loss": val_loss
@@ -128,13 +128,13 @@ end_time = time.time()
 total_time = end_time - start_time
 print(f"Total time: {total_time:.2f} seconds")
 
-with open("study_age.pkl", "wb") as f:
+with open("study_height.pkl", "wb") as f:
     pickle.dump(study, f)
 
-with open("log_time_age.txt", "w") as f:
+with open("log_time_height.txt", "w") as f:
     f.write(f"Total time: {total_time:.2f} seconds")
 
 save_best_hyperparameters(study)
 print("Best hyperparameters:", study.best_params)
 
-send_email("hyperparameter age optimization")
+send_email("hyperparameter height optimization")
