@@ -16,11 +16,11 @@ from tensorflow.keras.callbacks import EarlyStopping
 from src.training.mailer import send_email
 
 # Load data
-df = pd.read_csv("processed_train_data_height.csv")
+df = pd.read_csv("processed_train_data_weight.csv")
 
 # Adjust data
 X_acc_x, X_acc_y, X_acc_z, X_gyro_x, X_gyro_y, X_gyro_z, class_labels = matrix_fourier_adjust(df)
-class_labels -= 1 # adjust labels
+# class_labels -= 1 # adjust labels
 
 # parameters
 input_shape = (256, 1) # shape of the input data
@@ -36,7 +36,7 @@ input_gyro_z, branch_gyro_z = create_branch(input_shape)
 # concatenate branches
 merged = Concatenate()([branch_acc_x, branch_acc_y, branch_acc_z, branch_gyro_x, branch_gyro_y, branch_gyro_z])
 
-best_hyperparameters = "./src/training/hyperparams/best_hyperparameters_height.json"
+best_hyperparameters = "./src/training/hyperparams/best_hyperparameters_weight.json"
 with open(best_hyperparameters, 'r') as f:
     best_hyperparameters = json.load(f)
 
@@ -79,7 +79,7 @@ final_time = time.time()
 # time spent for training
 time_spent = final_time - initial_time
 
-with open("log_time_training_height.txt", "w") as f:
+with open("log_time_training_weight.txt", "w") as f:
     f.write(str(time_spent))
 
 print("Training finished")
@@ -87,7 +87,7 @@ print("Time spent for training: ")
 print(final_time)
 
 # Save model
-model.save("height_classifier.h5")
+model.save("weight_classifier.h5")
 
 # Send email
-send_email("training height classifier model")
+send_email("training weight classifier model")

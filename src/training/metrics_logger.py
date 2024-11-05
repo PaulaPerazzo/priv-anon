@@ -73,7 +73,7 @@ class MetricsLogger(tf.keras.callbacks.Callback):
             for key, values in self.epoch_metrics.items()
         }
 
-        with open("training_metrics_age.json", "w") as f:
+        with open("training_metrics_weight.json", "w") as f:
             json.dump(epoch_metrics_serializable, f)
 
-        print("Training metrics saved to training_metrics_age.json")
+        print("Training metrics saved to training_metrics_weight.json")

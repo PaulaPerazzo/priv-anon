@@ -1,0 +1,8 @@
+{
+    "num_filters1": 64, 
+    "num_filters2": 32, 
+    "dense_units1": 64, 
+    "dense_units2": 64, 
+    "learning_rate": 0.00011782571150321188, 
+    "batch_size": 64
+}
