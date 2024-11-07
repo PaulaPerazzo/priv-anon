@@ -18,3 +18,11 @@ shar.ipynb
 /data
 ./data
 data
+
+.env
+
+motion_sense_cont.ipynb
+
+src/models
+models/models
+models
