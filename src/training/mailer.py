@@ -7,8 +7,8 @@ from email.mime.text import MIMEText
 def send_email(subject):
     msg = MIMEMultipart()
 
-    email = "mpps@cin.ufpe.br"
-    password = "ptfe ptnq xupt vqbg"
+    email = ""
+    password = ""
     message = f"your code for {subject} is ready"
 
     msg['From'] = email
