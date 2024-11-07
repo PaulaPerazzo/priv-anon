@@ -26,3 +26,7 @@ motion_sense_cont.ipynb
 src/models
 models/models
 models
+
+anonymized_sensor_data.csv
+motion_sense_anonymized.ipynb
+processed_train_data_activity_anonymized.csv
